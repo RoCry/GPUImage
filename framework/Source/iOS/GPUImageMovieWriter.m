@@ -31,7 +31,10 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
     CMTime startTime, previousFrameTime;
     
+    CMTime pausingTimeDiff, previousFrameTimeWhilePausing;
+    
     BOOL isRecording;
+    BOOL isPausing;
 }
 
 // Movie recording
@@ -146,6 +149,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 - (void)initializeMovieWithOutputSettings:(NSMutableDictionary *)outputSettings;
 {
     isRecording = NO;
+    isPausing = NO;
     
     self.enabled = YES;
     frameData = (GLubyte *) malloc((int)videoSize.width * (int)videoSize.height * 4);
@@ -232,7 +236,9 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 - (void)startRecording;
 {
     isRecording = YES;
+    isPausing = NO;
     startTime = kCMTimeInvalid;
+    pausingTimeDiff = kCMTimeInvalid;
 	//    [assetWriter startWriting];
     
 	//    [assetWriter startSessionAtSourceTime:kCMTimeZero];
@@ -245,6 +251,16 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 	[self startRecording];
 }
 
+- (void)pauseRecording;
+{
+    isPausing = YES;
+}
+
+- (void)resumeRecording;
+{
+    isPausing = NO;
+}
+
 - (void)cancelRecording;
 {
     if (assetWriter.status == AVAssetWriterStatusCompleted)
@@ -253,6 +269,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     }
     
     isRecording = NO;
+    isPausing = NO;
     runOnMainQueueWithoutDeadlocking(^{
         [assetWriterVideoInput markAsFinished];
         [assetWriterAudioInput markAsFinished];
@@ -273,6 +290,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     }
 
     isRecording = NO;
+    isPausing = NO;
     runOnMainQueueWithoutDeadlocking(^{
         [assetWriterVideoInput markAsFinished];
         [assetWriterAudioInput markAsFinished];
@@ -298,6 +316,11 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 - (void)processAudioBuffer:(CMSampleBufferRef)audioBuffer;
 {
     if (!isRecording)
+    {
+        return;
+    }
+    
+    if (isPausing)
     {
         return;
     }
@@ -493,14 +516,42 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     {
         return;
     }
-
+    
     // Drop frames forced by images and other things with no time constants
     // Also, if two consecutive times with the same value are added to the movie, it aborts recording, so I bail on that case
-    if ( (CMTIME_IS_INVALID(frameTime)) || (CMTIME_COMPARE_INLINE(frameTime, ==, previousFrameTime)) || (CMTIME_IS_INDEFINITE(frameTime)) ) 
+    if ( (CMTIME_IS_INVALID(frameTime)) || (CMTIME_COMPARE_INLINE(frameTime, ==, previousFrameTime)) || (CMTIME_IS_INDEFINITE(frameTime)) )
     {
         return;
     }
-
+    
+    if (isPausing)
+    {
+        if (CMTIME_IS_INVALID(previousFrameTimeWhilePausing))
+        {
+            if (CMTIME_IS_INVALID(pausingTimeDiff))
+            {
+                pausingTimeDiff = kCMTimeZero;
+            }
+            
+            previousFrameTimeWhilePausing = frameTime;
+        }
+        
+        pausingTimeDiff = CMTimeAdd(pausingTimeDiff, CMTimeSubtract(frameTime, previousFrameTimeWhilePausing));
+        previousFrameTimeWhilePausing = frameTime;
+        return;
+    }
+    else
+    {
+        if (CMTIME_IS_VALID(previousFrameTimeWhilePausing))
+        {
+            previousFrameTimeWhilePausing = kCMTimeInvalid;
+        }
+        if (CMTIME_IS_VALID(pausingTimeDiff))
+        {
+            frameTime = CMTimeSubtract(frameTime, pausingTimeDiff);
+        }
+    }
+    
     if (CMTIME_IS_INVALID(startTime))
     {
         if (videoInputReadyCallback == NULL)
