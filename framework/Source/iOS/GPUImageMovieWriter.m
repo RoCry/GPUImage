@@ -244,6 +244,14 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 	//    [assetWriter startSessionAtSourceTime:kCMTimeZero];
 }
 
+- (void)startButPauseRecoding;
+{
+    isRecording = YES;
+    isPausing = YES;
+    startTime = kCMTimeInvalid;
+    pausingTimeDiff = kCMTimeInvalid;
+}
+
 - (void)startRecordingInOrientation:(CGAffineTransform)orientationTransform;
 {
 	assetWriterVideoInput.transform = orientationTransform;
@@ -526,6 +534,10 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
     if (isPausing)
     {
+        if (CMTIME_IS_INVALID(startTime)) {
+            return;
+        }
+        
         if (CMTIME_IS_INVALID(previousFrameTimeWhilePausing))
         {
             if (CMTIME_IS_INVALID(pausingTimeDiff))
