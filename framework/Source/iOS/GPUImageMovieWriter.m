@@ -345,7 +345,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             return;
         }
         
-//        NSLog(@"Recorded audio sample time: %lld, %d, %lld", currentSampleTime.value, currentSampleTime.timescale, currentSampleTime.epoch);
+        NSLog(@"Recorded audio sample time: %lld, %d, %lld", currentSampleTime.value, currentSampleTime.timescale, currentSampleTime.epoch);
         [assetWriterAudioInput appendSampleBuffer:audioBuffer];
     }
 }
@@ -603,7 +603,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     } 
     else 
     {
-//        NSLog(@"Recorded video sample time: %lld, %d, %lld", frameTime.value, frameTime.timescale, frameTime.epoch);
+        NSLog(@"Recorded video sample time: %lld, %d, %lld", frameTime.value, frameTime.timescale, frameTime.epoch);
     }
     CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
     
