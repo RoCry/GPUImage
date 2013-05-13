@@ -339,6 +339,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         
         if (CMTIME_IS_INVALID(startTime))
         {
+            NSLog(@"startTime in audio");
             if (audioInputReadyCallback == NULL)
             {
                 [assetWriter startWriting];
@@ -353,7 +354,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             return;
         }
         
-        NSLog(@"Recorded audio sample time: %lld, %d, %lld", currentSampleTime.value, currentSampleTime.timescale, currentSampleTime.epoch);
+//        NSLog(@"Recorded audio sample time: %lld, %d, %lld", currentSampleTime.value, currentSampleTime.timescale, currentSampleTime.epoch);
         [assetWriterAudioInput appendSampleBuffer:audioBuffer];
     }
 }
@@ -534,7 +535,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
     if (isPausing)
     {
-        if (CMTIME_IS_INVALID(startTime)) {
+        if (CMTIME_IS_NEGATIVE_INFINITY(previousFrameTime)) {
             return;
         }
         
@@ -566,6 +567,8 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
     if (CMTIME_IS_INVALID(startTime))
     {
+        NSLog(@"startTime in video");
+        if (_hasAudioTrack) return; // add this return to fix bug.. but not sure about it
         if (videoInputReadyCallback == NULL)
         {
             [assetWriter startWriting];
@@ -615,7 +618,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     } 
     else 
     {
-        NSLog(@"Recorded video sample time: %lld, %d, %lld", frameTime.value, frameTime.timescale, frameTime.epoch);
+//        NSLog(@"Recorded video sample time: %lld, %d, %lld", frameTime.value, frameTime.timescale, frameTime.epoch);
     }
     CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
     
