@@ -753,5 +753,8 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     }
 }
 
-
+- (AVAssetWriterStatus)status;
+{
+    return assetWriter.status;
+}
 @end
