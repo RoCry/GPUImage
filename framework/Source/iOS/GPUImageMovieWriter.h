@@ -45,6 +45,8 @@ extern NSString *const kGPUImageColorSwizzlingFragmentShaderString;
 @property(nonatomic, copy) void(^audioInputReadyCallback)(void);
 @property(nonatomic) BOOL enabled;
 
+@property(nonatomic, readonly) BOOL needHandleBlack;
+
 // Initialization and teardown
 - (id)initWithMovieURL:(NSURL *)newMovieURL size:(CGSize)newSize;
 - (id)initWithMovieURL:(NSURL *)newMovieURL size:(CGSize)newSize fileType:(NSString *)newFileType outputSettings:(NSMutableDictionary *)outputSettings;
