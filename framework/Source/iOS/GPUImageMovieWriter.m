@@ -292,7 +292,8 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 
 - (void)finishRecordingWithCompletionHandler:(void (^)(void))handler;
 {
-    if (assetWriter.status == AVAssetWriterStatusCompleted)
+    if (assetWriter.status == AVAssetWriterStatusCompleted || assetWriter.status == AVAssetWriterStatusCancelled
+        || assetWriter.status == AVAssetWriterStatusUnknown)
     {
         return;
     }
@@ -434,37 +435,39 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 
 - (void)destroyDataFBO;
 {
-    [GPUImageContext useImageProcessingContext];
+    runSynchronouslyOnVideoProcessingQueue(^{
+        [GPUImageContext useImageProcessingContext];
 
-    if (movieFramebuffer)
-	{
-		glDeleteFramebuffers(1, &movieFramebuffer);
-		movieFramebuffer = 0;
-	}	
-    
-    if (movieRenderbuffer)
-	{
-		glDeleteRenderbuffers(1, &movieRenderbuffer);
-		movieRenderbuffer = 0;
-	}	
-    
-    if ([GPUImageContext supportsFastTextureUpload])
-    {
-        if (coreVideoTextureCache)
+        if (movieFramebuffer)
         {
-            CFRelease(coreVideoTextureCache);
+            glDeleteFramebuffers(1, &movieFramebuffer);
+            movieFramebuffer = 0;
         }
-
-        if (renderTexture)
+        
+        if (movieRenderbuffer)
         {
-            CFRelease(renderTexture);
+            glDeleteRenderbuffers(1, &movieRenderbuffer);
+            movieRenderbuffer = 0;
         }
-        if (renderTarget)
+        
+        if ([GPUImageContext supportsFastTextureUpload])
         {
-            CVPixelBufferRelease(renderTarget);
+            if (coreVideoTextureCache)
+            {
+                CFRelease(coreVideoTextureCache);
+            }
+            
+            if (renderTexture)
+            {
+                CFRelease(renderTexture);
+            }
+            if (renderTarget)
+            {
+                CVPixelBufferRelease(renderTarget);
+            }
+            
         }
-
-    }
+    });
 }
 
 - (void)setFilterFBO;
