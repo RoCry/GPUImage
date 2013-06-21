@@ -584,7 +584,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         NSLog(@"startTime in video");
         if (_hasAudioTrack) {
             _needHandleBlack = YES;
-            return;
+//            return;
         }
         // END of ugly code
         
