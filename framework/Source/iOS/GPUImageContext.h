@@ -6,9 +6,9 @@
 #import <CoreMedia/CoreMedia.h>
 #import "GLProgram.h"
 
-#define GPUImageRotationSwapsWidthAndHeight(rotation) ((rotation) == kGPUImageRotateLeft || (rotation) == kGPUImageRotateRight || (rotation) == kGPUImageRotateRightFlipVertical)
+#define GPUImageRotationSwapsWidthAndHeight(rotation) ((rotation) == kGPUImageRotateLeft || (rotation) == kGPUImageRotateRight || (rotation) == kGPUImageRotateRightFlipVertical || (rotation) == kGPUImageRotateRightFlipHorizontal)
 
-typedef enum { kGPUImageNoRotation, kGPUImageRotateLeft, kGPUImageRotateRight, kGPUImageFlipVertical, kGPUImageFlipHorizonal, kGPUImageRotateRightFlipVertical, kGPUImageRotate180 } GPUImageRotationMode;
+typedef enum { kGPUImageNoRotation, kGPUImageRotateLeft, kGPUImageRotateRight, kGPUImageFlipVertical, kGPUImageFlipHorizonal, kGPUImageRotateRightFlipVertical, kGPUImageRotateRightFlipHorizontal, kGPUImageRotate180 } GPUImageRotationMode;
 
 @interface GPUImageContext : NSObject
 
@@ -25,6 +25,7 @@ typedef enum { kGPUImageNoRotation, kGPUImageRotateLeft, kGPUImageRotateRight, k
 + (GLint)maximumTextureUnitsForThisDevice;
 + (BOOL)deviceSupportsOpenGLESExtension:(NSString *)extension;
 + (BOOL)deviceSupportsRedTextures;
++ (BOOL)deviceSupportsFramebufferReads;
 + (CGSize)sizeThatFitsWithinATextureForSize:(CGSize)inputSize;
 
 - (void)presentBufferForDisplay;
