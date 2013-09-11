@@ -570,23 +570,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
     if (CMTIME_IS_INVALID(startTime))
     {
-        /*
-         以下几行代码写的丑是这么个原因: 
-         
-         如果拍摄视频的时候是先在- (void)processAudioBuffer:(CMSampleBufferRef)audioBuffer;里面start就没有任何问题
-         
-         如果是在这边start的话, 视频前几帧也没黑屏, 看起来也没有问题(也能播放什么的)
-         但是放在GPUImageMovie去enableSynchronizedEncodingUsingMovieWriter的话, 就会在读音频的地方死锁...
-         
-         所以, 没有办法的我就强制从processAudioBuffer那边start,
-         但是这样的话因为丢了几帧的视频, 会有黑屏的现象, 然后就在这里置了一个标志位来后面处理
-         */
         NSLog(@"startTime in video");
-        if (_hasAudioTrack) {
-            _needHandleBlack = YES;
-//            return;
-        }
-        // END of ugly code
         
         if (videoInputReadyCallback == NULL)
         {
