@@ -189,7 +189,8 @@
     GPUImageMovie __block *blockSelf = self;
     
     [inputAsset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler: ^{
-        runSynchronouslyOnVideoProcessingQueue(^{
+        // FIXME: remove this maybe cause some bug!!!
+//        runSynchronouslyOnVideoProcessingQueue(^{
             NSError *error = nil;
             AVKeyValueStatus tracksStatus = [inputAsset statusOfValueForKey:@"tracks" error:&error];
             if (!tracksStatus == AVKeyValueStatusLoaded)
@@ -199,7 +200,7 @@
             blockSelf.asset = inputAsset;
             [blockSelf processAsset];
             blockSelf = nil;
-        });
+//        });
     }];
 }
 
